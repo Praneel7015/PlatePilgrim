@@ -208,7 +208,11 @@ export const handler = async (event) => {
     if (method === "GET" && rawPath === "/meals") return await listMeals(sub);
     if (method === "GET" && rawPath === "/stamps") return await getStamps(sub);
     if (method === "POST" && rawPath === "/meals") {
-      const body = JSON.parse(event.body || "{}");
+      const raw = event.body || "{}";
+      const parsed = event.isBase64Encoded
+        ? Buffer.from(raw, "base64").toString("utf8")
+        : raw;
+      const body = JSON.parse(parsed);
       return await logMeal(sub, body);
     }
     if (method === "DELETE" && mealId) return await deleteMeal(sub, mealId);

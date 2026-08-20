@@ -93,14 +93,15 @@ export class PlatePilgrimStack extends cdk.Stack {
 
     const commonFnProps: Partial<lambda.NodejsFunctionProps> = {
       runtime: lambdaBase.Runtime.NODEJS_20_X,
-      timeout: cdk.Duration.seconds(15),
+      timeout: cdk.Duration.seconds(20),
       memorySize: 256,
       depsLockFilePath: path.join(__dirname, "../../backend/package-lock.json"),
       projectRoot: path.join(__dirname, "../../backend"),
       bundling: {
-        format: lambda.OutputFormat.ESM,
+        // CJS avoids "Dynamic require of node:https is not supported" when
+        // esbuild bundles AWS SDK v3 into an ESM Lambda.
+        format: lambda.OutputFormat.CJS,
         target: "node20",
-        externalModules: [],
       },
     };
 

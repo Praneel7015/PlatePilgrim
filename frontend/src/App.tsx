@@ -53,17 +53,21 @@ function App() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; stamp?: boolean } | null>(null);
 
-  if (window.location.pathname === "/callback") return <CallbackPage />;
-
+  const isCallback = window.location.pathname === "/callback";
 
   useEffect(() => {
-    if (!authed) return;
+    if (!authed || isCallback) return;
     setLoading(true);
     Promise.all([api.getMeals(), api.getStamps()])
       .then(([mr, sr]) => { setMeals(mr.meals); setStamps(sr.stamps); })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        showToast("Could not load your journey. Try signing in again.");
+      })
       .finally(() => setLoading(false));
-  }, [authed]);
+  }, [authed, isCallback]);
+
+  if (isCallback) return <CallbackPage />;
 
   function showToast(msg: string, isStamp = false) {
     setToast({ msg, stamp: isStamp });
@@ -91,9 +95,15 @@ function App() {
   async function handleDare() {
     setDareLoading(true);
     setShowDare(true);
-    try { setDare(await api.getDare()); }
-    catch (e) { console.error(e); }
-    finally { setDareLoading(false); }
+    try {
+      setDare(await api.getDare());
+    } catch (e) {
+      console.error(e);
+      setShowDare(false);
+      showToast("Dare failed — sign out and back in, then try again.");
+    } finally {
+      setDareLoading(false);
+    }
   }
 
   function handleMapClick(code: string) {
@@ -144,8 +154,9 @@ function App() {
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button
-            onClick={() => setShowLogger(true)}
+        <button
+          type="button"
+          onClick={() => setShowLogger(true)}
             style={{
               display: "flex", alignItems: "center", gap: 6,
               background: "var(--color-red)", color: "#fff",
@@ -185,8 +196,8 @@ function App() {
 
         {/* Floating stat bar — bottom-left */}
         <div style={{
-          position: "absolute", bottom: 24, left: 20,
-          display: "flex", gap: 6,
+          position: "absolute", bottom: 24, left: 20, zIndex: 20,
+          display: "flex", gap: 6, pointerEvents: "none",
         }}>
           {[
             { value: meals.length, label: "dishes" },
@@ -211,10 +222,11 @@ function App() {
 
         {/* Dare button — bottom-right */}
         <button
+          type="button"
           onClick={handleDare}
           className="glass"
           style={{
-            position: "absolute", bottom: 24, right: 20,
+            position: "absolute", bottom: 24, right: 20, zIndex: 20,
             display: "flex", alignItems: "center", gap: 8,
             border: "1px solid var(--color-border)", borderRadius: 12,
             padding: "12px 18px", cursor: "pointer",

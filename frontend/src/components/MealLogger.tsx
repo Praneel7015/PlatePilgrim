@@ -35,7 +35,12 @@ export default function MealLogger({ onClose, onLogged, preselectedCountry }: Pr
       });
       onLogged(result.meal, result.stampAwarded);
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      if (message.includes("401") || message.includes("403")) {
+        setError("Session expired. Sign out and sign in again, then retry.");
+      } else {
+        setError("Could not log this dish. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
