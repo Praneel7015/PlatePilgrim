@@ -1,0 +1,84 @@
+{
+  "categories": {
+    "form": {
+      "displayGraphics": true,
+      "location": {
+        "horizontal": "CENTER",
+        "vertical": "CENTER"
+      }
+    },
+    "global": {
+      "colorSchemeMode": "LIGHT",
+      "pageFooter": { "enabled": false },
+      "pageHeader": { "enabled": false },
+      "spacingDensity": "REGULAR"
+    }
+  },
+  "componentClasses": {
+    "buttons": { "borderRadius": 10.0 },
+    "focusState": {
+      "lightMode": { "borderColor": "dc3220ff" }
+    },
+    "input": {
+      "borderRadius": 8.0,
+      "lightMode": {
+        "defaults": {
+          "backgroundColor": "ffffffff",
+          "borderColor": "d2cbbdff"
+        },
+        "placeholderColor": "5a5f6cff"
+      }
+    },
+    "inputLabel": {
+      "lightMode": { "textColor": "111318ff" }
+    },
+    "link": {
+      "lightMode": {
+        "defaults": { "textColor": "dc3220ff" },
+        "hover": { "textColor": "b82a1aff" }
+      }
+    }
+  },
+  "components": {
+    "form": {
+      "borderRadius": 16.0,
+      "lightMode": {
+        "backgroundColor": "ffffffff",
+        "borderColor": "d2cbbdff"
+      },
+      "logo": {
+        "enabled": true,
+        "formInclusion": "IN",
+        "location": "CENTER",
+        "position": "TOP"
+      }
+    },
+    "pageBackground": {
+      "image": { "enabled": false },
+      "lightMode": { "color": "f6f1e8ff" }
+    },
+    "pageText": {
+      "lightMode": {
+        "bodyColor": "4b5060ff",
+        "descriptionColor": "4b5060ff",
+        "headingColor": "111318ff"
+      }
+    },
+    "primaryButton": {
+      "lightMode": {
+        "active": { "backgroundColor": "b82a1aff", "textColor": "ffffffff" },
+        "defaults": { "backgroundColor": "dc3220ff", "textColor": "ffffffff" },
+        "hover": { "backgroundColor": "b82a1aff", "textColor": "ffffffff" }
+      }
+    },
+    "secondaryButton": {
+      "lightMode": {
+        "defaults": {
+          "backgroundColor": "ffffffff",
+          "borderColor": "1a2744ff",
+          "textColor": "1a2744ff"
+        }
+      }
+    }
+  }
+}

@@ -70,6 +70,7 @@ export class PlatePilgrimStack extends cdk.Stack {
           // Must be globally unique — change if taken
           domainPrefix: "platepilgrim",
         },
+        managedLoginVersion: cognito.ManagedLoginVersion.NEWER_MANAGED_LOGIN,
       }
     );
 
