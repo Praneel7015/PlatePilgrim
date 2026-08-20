@@ -14,8 +14,35 @@ import DareCard from "./components/DareCard";
 import DarkModeToggle from "./components/DarkModeToggle";
 import PassportDrawer from "./components/PassportDrawer";
 
+// Handles the /callback route — exchanges Cognito code for tokens, then redirects home.
+function CallbackPage() {
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    handleCallback()
+      .then(() => { window.location.replace("/"); })
+      .catch((e) => setError(String(e)));
+  }, []);
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F0E8] dark:bg-[#1a252f]">
+        <p className="text-[#C0392B] text-sm">Sign-in failed: {error}</p>
+      </div>
+    );
+  }
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F0E8] dark:bg-[#1a252f]">
+      <p className="text-[#2C3E50]/60 dark:text-white/60 text-sm">Signing you in…</p>
+    </div>
+  );
+}
+
 function App() {
-  const [authed, setAuthed] = useState(isAuthenticated());
+  // Render the callback page when Cognito redirects back with ?code=
+  if (window.location.pathname === "/callback") {
+    return <CallbackPage />;
+  }
+
+  const [authed] = useState(isAuthenticated());
   const [meals, setMeals] = useState<Meal[]>([]);
   const [stamps, setStamps] = useState<Stamp[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,17 +54,6 @@ function App() {
   const [notification, setNotification] = useState<string | null>(null);
 
   const user = getCurrentUser();
-
-  // Handle Cognito callback
-  useEffect(() => {
-    if (window.location.pathname === "/callback") {
-      handleCallback()
-        .then(() => {
-          setAuthed(isAuthenticated());
-        })
-        .catch(console.error);
-    }
-  }, []);
 
   // Load data when authenticated
   useEffect(() => {
