@@ -91,8 +91,8 @@ Browser → CloudFront (/api/* → API Gateway, /* → S3)
 
 ## Link to App / Repo
 
-- **Live app:** https://[CloudFront domain after deploy]
-- **GitHub:** https://github.com/[your-handle]/PlatePilgrim
+- **Live app:** https://d216erfdefvgq6.cloudfront.net
+- **GitHub:** https://github.com/Praneel7015/PlatePilgrim
 
 ---
 

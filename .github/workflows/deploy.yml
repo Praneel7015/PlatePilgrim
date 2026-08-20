@@ -93,12 +93,17 @@ jobs:
 
       - name: Sync to S3
         run: |
-          aws s3 sync frontend/dist "s3://${{ needs.deploy-infra.outputs.bucket }}" \
+          BUCKET="${{ needs.deploy-infra.outputs.bucket }}"
+          # Fallback to known bucket if CDK outputs step was skipped
+          BUCKET="${BUCKET:-platepilgrimstack-platepilgrimfrontend30f355f1-x0xeym3tgxdj}"
+          aws s3 sync frontend/dist "s3://$BUCKET" \
             --delete \
             --cache-control "max-age=60"
 
       - name: Invalidate CloudFront
         run: |
+          DIST_ID="${{ needs.deploy-infra.outputs.distribution_id }}"
+          DIST_ID="${DIST_ID:-E3RU927NEUSUF1}"
           aws cloudfront create-invalidation \
-            --distribution-id "${{ needs.deploy-infra.outputs.distribution_id }}" \
+            --distribution-id "$DIST_ID" \
             --paths "/*"

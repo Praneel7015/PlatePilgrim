@@ -22,6 +22,11 @@ CI/CD: GitHub Actions
 - Node.js 20+
 - AWS CDK v2 (`npm install -g aws-cdk`)
 
+### Live deployment
+- **App:** https://d216erfdefvgq6.cloudfront.net
+- **API:** https://hgte1r7jff.execute-api.ap-south-1.amazonaws.com
+- **Cognito Hosted UI:** https://platepilgrim.auth.ap-south-1.amazoncognito.com
+
 ### 1. Deploy infrastructure
 
 ```bash
@@ -78,14 +83,14 @@ Or just push to `main` — GitHub Actions does it automatically.
 
 ## GitHub Actions Secrets
 
-Set these in your repo → Settings → Secrets:
+Set these in your repo → Settings → Secrets and variables → Actions:
 
 | Secret | Value |
 |---|---|
-| `AWS_ACCESS_KEY_ID` | IAM user key |
+| `AWS_ACCESS_KEY_ID` | IAM user key for `praneel7015` |
 | `AWS_SECRET_ACCESS_KEY` | IAM user secret |
-| `VITE_COGNITO_DOMAIN` | e.g. `https://platepilgrim.auth.ap-south-1.amazoncognito.com` |
-| `VITE_COGNITO_CLIENT_ID` | From CDK output `UserPoolClientId` |
+| `VITE_COGNITO_DOMAIN` | `https://platepilgrim.auth.ap-south-1.amazoncognito.com` |
+| `VITE_COGNITO_CLIENT_ID` | `25klgjete6qfkek6uko5t05k7g` |
 
 ## Project Structure
 
