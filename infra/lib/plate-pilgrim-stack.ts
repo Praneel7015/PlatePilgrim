@@ -233,6 +233,12 @@ export class PlatePilgrimStack extends cdk.Stack {
         },
         defaultRootObject: "index.html",
         errorResponses: [
+          // S3 with OAC returns 403 (not 404) for missing files — must catch both
+          {
+            httpStatus: 403,
+            responseHttpStatus: 200,
+            responsePagePath: "/index.html",
+          },
           {
             httpStatus: 404,
             responseHttpStatus: 200,
