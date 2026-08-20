@@ -75,10 +75,112 @@ export const COUNTRIES: CountryMeta[] = [
   { code: "MN", name: "Mongolia",       cuisine: "Mongolian",     emoji: "🥩", continent: "Asia",     difficulty: 3 },
 ];
 
+function normalizeName(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9.]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 const byCode = new Map(COUNTRIES.map((c) => [c.code, c]));
+const byName = new Map(COUNTRIES.map((c) => [normalizeName(c.name), c]));
+
+const NAME_ALIASES: Record<string, string> = {
+  "united states of america": "US",
+  "united states": "US",
+  "usa": "US",
+  "u.s.a.": "US",
+  "u.s.": "US",
+  "united kingdom": "GB",
+  "great britain": "GB",
+  "uk": "GB",
+  "england": "GB",
+  "south korea": "KR",
+  "korea": "KR",
+  "republic of korea": "KR",
+  "dem. rep. korea": "KR",
+  "russia": "RU",
+  "russian federation": "RU",
+  "iran": "IR",
+  "iran (islamic republic of)": "IR",
+  "viet nam": "VN",
+  "vietnam": "VN",
+  "myanmar": "MM",
+  "burma": "MM",
+  "lao pdr": "LA",
+  "czech republic": "CZ",
+  "czechia": "CZ",
+  "bolivia": "BO",
+  "tanzania": "TZ",
+  "syria": "SY",
+  "palestine": "PS",
+  "west bank": "PS",
+  "n. cyprus": "CY",
+  "somaliland": "SO",
+  "eswatini": "SZ",
+  "swaziland": "SZ",
+  "cote d'ivoire": "CI",
+  "ivory coast": "CI",
+  "democratic republic of the congo": "CD",
+  "dem. rep. congo": "CD",
+  "congo": "CG",
+  "south sudan": "SS",
+  "s. sudan": "SS",
+  "central african rep.": "CF",
+  "eq. guinea": "GQ",
+  "solomon is.": "SB",
+  "falkland is.": "FK",
+  "w. sahara": "EH",
+  "bosnia and herz.": "BA",
+  "north macedonia": "MK",
+  "macedonia": "MK",
+};
+
+const aliasByName = new Map(
+  Object.entries(NAME_ALIASES).map(([alias, code]) => [normalizeName(alias), code])
+);
 
 export function getCountry(code: string): CountryMeta | undefined {
+  if (!code) return undefined;
   return byCode.get(code.toUpperCase());
+}
+
+export function getCountryByName(name: string): CountryMeta | undefined {
+  const key = normalizeName(name);
+  if (!key) return undefined;
+  const aliasCode = aliasByName.get(key);
+  return byName.get(key) ?? (aliasCode ? getCountry(aliasCode) : undefined);
+}
+
+/** Map Natural Earth / world-atlas feature props to an ISO-2 code we can use. */
+export function resolveMapCountry(props: Record<string, unknown> | undefined | null): { code: string; name: string } | null {
+  if (!props) return null;
+
+  const isoCandidates = [
+    props.ISO_A2_EH, props.ISO_A2, props.iso_a2, props.ISO_A2_NL, props.WB_A2,
+  ]
+    .map((v) => String(v || "").toUpperCase())
+    .filter((v) => v.length === 2 && v !== "-99" && v !== "XX");
+
+  for (const code of isoCandidates) {
+    const meta = getCountry(code);
+    if (meta) return { code: meta.code, name: meta.name };
+  }
+
+  const names = [props.NAME, props.NAME_LONG, props.ADMIN, props.NAME_EN, props.name]
+    .map((v) => String(v || "").trim())
+    .filter(Boolean);
+
+  for (const name of names) {
+    const meta = getCountryByName(name);
+    if (meta) return { code: meta.code, name: meta.name };
+  }
+
+  return null;
 }
 
 export function getContinents(codes: string[]): Set<string> {

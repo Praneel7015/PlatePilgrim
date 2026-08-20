@@ -35,12 +35,7 @@ export default function LandingPage({ isDark, onToggle, onSignIn }: Props) {
     <div style={{ background: "var(--color-bg)", color: "var(--color-ink)", minHeight: "100vh" }}>
 
       {/* ── Nav ───────────────────────────────────────────────────── */}
-      <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 30,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 32px", height: 56,
-        borderBottom: "1px solid var(--color-border)",
-      }} className="glass">
+      <nav className="glass pp-topbar">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 22 }}>🌍</span>
           <span style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: 17, color: "var(--color-ink)", letterSpacing: "-0.3px" }}>

@@ -141,38 +141,25 @@ function App() {
       )}
 
       {/* Fixed glass header */}
-      <header className="glass" style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 30,
-        height: 56, display: "flex", alignItems: "center",
-        justifyContent: "space-between", padding: "0 20px",
-        borderBottom: "1px solid var(--color-border)",
-      }}>
+      <header className="glass pp-topbar">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 22 }}>🌍</span>
-          <span style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: 18, color: "var(--color-ink)", letterSpacing: "-0.3px" }}>
+          <span className="pp-brand">
             PlatePilgrim
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="pp-topbar-actions">
         <button
           type="button"
-          onClick={() => setShowLogger(true)}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              background: "var(--color-red)", color: "#fff",
-              border: "none", borderRadius: 8,
-              padding: "7px 14px", fontSize: 13, fontWeight: 600,
-              cursor: "pointer", transition: "background 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-red-hover)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-red)")}
+          onClick={() => { setPreselectCountry(undefined); setShowLogger(true); }}
+            className="pp-btn-primary pp-btn-header"
           >
-            <span style={{ fontSize: 15, lineHeight: 1 }}>+</span> Add dish
+            <span style={{ fontSize: 15, lineHeight: 1 }}>+</span> <span className="pp-add-label">Add dish</span>
           </button>
           <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
           <button
             onClick={signOut}
-            style={{ fontSize: 12, color: "var(--color-ink-3)", background: "none", border: "none", cursor: "pointer", padding: "4px 6px" }}
+            className="pp-text-btn"
           >
             Sign out
           </button>
@@ -180,40 +167,32 @@ function App() {
       </header>
 
       {/* Full-viewport map hero */}
-      <section style={{ position: "relative", height: "100dvh" as string }}>
-        {loading ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", background: "var(--color-map-ocean)" }}>
+      <section className="pp-map-stage">
+        <WorldMap
+          stampedCodes={stampedCodes}
+          exploredCounts={exploredCounts}
+          onCountryClick={handleMapClick}
+          isDark={isDark}
+        />
+        {loading && (
+          <div className="pp-map-loading">
             <div className="spinner" style={{ width: 44, height: 44 }} />
           </div>
-        ) : (
-          <WorldMap
-            stampedCodes={stampedCodes}
-            exploredCounts={exploredCounts}
-            onCountryClick={handleMapClick}
-            isDark={isDark}
-          />
         )}
 
         {/* Floating stat bar — bottom-left */}
-        <div style={{
-          position: "absolute", bottom: 24, left: 20, zIndex: 20,
-          display: "flex", gap: 6, pointerEvents: "none",
-        }}>
+        <div className="pp-stats">
           {[
             { value: meals.length, label: "dishes" },
             { value: stamps.length, label: "stamps" },
             { value: new Set(meals.map((m) => m.countryCode)).size, label: "countries" },
             { value: continentCount, label: "continents" },
           ].map((s) => (
-            <div key={s.label} className="glass" style={{
-              borderRadius: 12, padding: "10px 16px", textAlign: "center",
-              border: "1px solid var(--color-border)",
-              minWidth: 68,
-            }}>
-              <div style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: 28, lineHeight: 1, color: "var(--color-ink)" }}>
+            <div key={s.label} className="glass pp-stat">
+              <div className="pp-stat-value">
                 {s.value}
               </div>
-              <div style={{ fontSize: 10, fontWeight: 500, color: "var(--color-ink-3)", marginTop: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <div className="pp-stat-label">
                 {s.label}
               </div>
             </div>
@@ -224,24 +203,14 @@ function App() {
         <button
           type="button"
           onClick={handleDare}
-          className="glass"
-          style={{
-            position: "absolute", bottom: 24, right: 20, zIndex: 20,
-            display: "flex", alignItems: "center", gap: 8,
-            border: "1px solid var(--color-border)", borderRadius: 12,
-            padding: "12px 18px", cursor: "pointer",
-            fontSize: 13, fontWeight: 600, color: "var(--color-ink)",
-            transition: "border-color 0.15s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--color-amber)")}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
+          className="glass pp-dare"
         >
           <span>🎲</span> Dare me a dish
         </button>
       </section>
 
       {/* Below-fold: Your Journey */}
-      <section style={{ background: "var(--color-surface)", padding: "48px 24px 64px" }}>
+      <section className="pp-journey">
         {/* Recent meals */}
         <div style={{ marginBottom: 40 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
@@ -349,7 +318,7 @@ function App() {
           stamp={stamps.find((s) => s.countryCode === selectedCountry) ?? null}
           onClose={() => setSelectedCountry(null)}
           onDeleteMeal={handleMealDelete}
-          onAddDish={() => { setSelectedCountry(null); setPreselectCountry(selectedCountry); setShowLogger(true); }}
+          onAddDish={() => { setPreselectCountry(selectedCountry); setShowLogger(true); }}
         />
       )}
     </div>

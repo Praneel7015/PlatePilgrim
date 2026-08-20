@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import type { Meal, Stamp } from "../api";
 import { getCountry } from "../countries";
 
@@ -17,7 +17,7 @@ function PassportStamp({ country, stamp, meals }: { country: ReturnType<typeof g
   const stampDate = stamp ? new Date(stamp.earnedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+    <div className="pp-stamp-wrap">
       <svg
         width="160"
         height="160"
@@ -25,12 +25,9 @@ function PassportStamp({ country, stamp, meals }: { country: ReturnType<typeof g
         className={earned ? "animate-stamp-press" : ""}
         style={{ opacity: earned ? 1 : 0.4 }}
       >
-        {/* Outer ring */}
         <circle cx="80" cy="80" r="72" fill="none" stroke={strokeColor} strokeWidth={earned ? 2.5 : 1.5} />
-        {/* Inner dashed ring */}
         <circle cx="80" cy="80" r="62" fill="none" stroke={strokeColor} strokeWidth={1} strokeDasharray="4 3" />
 
-        {/* Top arc path (country name) */}
         <defs>
           <path id="topArc" d="M 14,80 A 66,66 0 0,1 146,80" />
           <path id="botArc" d="M 22,80 A 58,58 0 0,0 138,80" />
@@ -41,7 +38,6 @@ function PassportStamp({ country, stamp, meals }: { country: ReturnType<typeof g
           </textPath>
         </text>
 
-        {/* Center content */}
         <text x="80" y="72" textAnchor="middle" fontSize="28" dominantBaseline="middle">
           {country?.emoji ?? "🌍"}
         </text>
@@ -59,20 +55,12 @@ function PassportStamp({ country, stamp, meals }: { country: ReturnType<typeof g
         )}
       </svg>
 
-      {/* Progress bar if not earned yet */}
       {!earned && (
-        <div style={{ width: 160 }}>
-          <div style={{ height: 4, borderRadius: 4, background: "var(--color-border)", overflow: "hidden" }}>
-            <div
-              style={{
-                height: "100%", borderRadius: 4,
-                background: "var(--color-amber)",
-                width: `${(Math.min(meals.length, 3) / 3) * 100}%`,
-                transition: "width 0.5s ease",
-              }}
-            />
+        <div className="pp-stamp-progress">
+          <div className="pp-stamp-bar">
+            <div className="pp-stamp-bar-fill" style={{ width: `${(Math.min(meals.length, 3) / 3) * 100}%` }} />
           </div>
-          <p style={{ fontSize: 11, color: "var(--color-ink-3)", textAlign: "center", marginTop: 6 }}>
+          <p>
             {meals.length}/3 dishes · {3 - Math.min(meals.length, 3)} more to earn stamp
           </p>
         </div>
@@ -82,113 +70,72 @@ function PassportStamp({ country, stamp, meals }: { country: ReturnType<typeof g
 }
 
 export default function PassportDrawer({ countryCode, meals, stamp, onClose, onDeleteMeal, onAddDish }: Props) {
-  const drawerRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
   const country = getCountry(countryCode);
-
-  useEffect(() => {
-    // Slide in on mount
-    const el = drawerRef.current;
-    if (!el) return;
-    requestAnimationFrame(() => { el.style.transform = "translateX(0)"; });
-
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const difficulty = country?.difficulty === 3 ? "Adventurous" : country?.difficulty === 2 ? "Intermediate" : "Easy";
 
   function handleClose() {
-    const el = drawerRef.current;
-    if (!el) { onClose(); return; }
-    el.style.transform = "translateX(100%)";
+    setOpen(false);
     setTimeout(onClose, 280);
   }
 
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setOpen(true));
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") handleClose(); }
+    window.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
   return (
     <>
-      {/* Backdrop */}
       <div
         onClick={handleClose}
-        style={{
-          position: "fixed", inset: 0, zIndex: 40,
-          background: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)",
-        }}
-        className="animate-fade-in"
+        className="animate-fade-in pp-backdrop"
       />
 
-      {/* Drawer */}
-      <div
-        ref={drawerRef}
-        style={{
-          position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 50,
-          width: "min(420px, 100vw)",
-          background: "var(--color-surface)",
-          borderLeft: "1px solid var(--color-border)",
-          display: "flex", flexDirection: "column",
-          overflowY: "auto",
-          transform: "translateX(100%)",
-          transition: "transform 0.28s cubic-bezier(0.32, 0, 0.18, 1)",
-          willChange: "transform",
-        }}
-      >
-        {/* Header */}
-        <div style={{
-          position: "sticky", top: 0, zIndex: 10,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "16px 20px",
-          background: "var(--color-surface)",
-          borderBottom: "1px solid var(--color-border)",
-        }}>
+      <aside className={`pp-drawer${open ? " pp-drawer-open" : ""}`} aria-label={`${country?.name ?? countryCode} details`}>
+        <div className="pp-drawer-handle" />
+
+        <div className="pp-drawer-head">
           <div>
-            <h2 style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: 18, color: "var(--color-ink)", margin: 0 }}>
+            <h2>
               {country?.emoji} {country?.name ?? countryCode}
             </h2>
-            <p style={{ fontSize: 12, color: "var(--color-ink-3)", margin: "2px 0 0" }}>
-              {country?.cuisine} · {country?.continent}
+            <p>
+              {country?.cuisine} · {country?.continent} · {difficulty}
             </p>
           </div>
-          <button
-            onClick={handleClose}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "var(--color-ink-3)", padding: "4px 8px", lineHeight: 1 }}
-          >
-            ×
-          </button>
+          <button type="button" className="pp-icon-btn" onClick={handleClose} aria-label="Close">×</button>
         </div>
 
-        {/* Stamp */}
-        <div style={{ padding: "32px 20px 24px", display: "flex", justifyContent: "center", borderBottom: "1px solid var(--color-border)" }}>
+        <div className="pp-drawer-stamp">
           <PassportStamp country={country} stamp={stamp} meals={meals} />
         </div>
 
-        {/* Meal log */}
-        <div style={{ padding: "20px", flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--color-ink-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              Dishes logged
-            </span>
-            <button
-              onClick={onAddDish}
-              style={{
-                fontSize: 12, fontWeight: 600, color: "var(--color-red)",
-                background: "none", border: "none", cursor: "pointer", padding: "2px 6px",
-              }}
-            >
-              + Add dish
-            </button>
+        <div className="pp-drawer-body">
+          <button type="button" className="pp-btn-primary" onClick={onAddDish}>
+            + Add a dish from {country?.name ?? "this country"}
+          </button>
+
+          <div className="pp-drawer-log-head">
+            <span>Dishes logged</span>
+            <span>{meals.length}</span>
           </div>
 
           {meals.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "28px 0", color: "var(--color-ink-3)", fontSize: 14 }}>
-              No dishes logged yet.
-            </div>
+            <div className="pp-muted-center">No dishes logged yet. Add one to light this country up on the map.</div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="pp-meal-list">
               {meals.map((meal) => (
                 <MealCard key={meal.mealId} meal={meal} onDelete={onDeleteMeal} />
               ))}
             </div>
           )}
         </div>
-      </div>
+      </aside>
     </>
   );
 }
@@ -197,46 +144,20 @@ function MealCard({ meal, onDelete }: { meal: Meal; onDelete: (id: string) => vo
   const date = new Date(meal.loggedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <div
-      style={{
-        background: "var(--color-surface-2)",
-        border: "1px solid var(--color-border)",
-        borderRadius: 12, padding: "14px 14px",
-        position: "relative",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 600, fontSize: 14, color: "var(--color-ink)", marginBottom: 3 }}>
-            {meal.dish}
-          </div>
-          <div style={{ fontSize: 11, color: "var(--color-ink-3)" }}>{date}</div>
-          {meal.notes && (
-            <div style={{ fontSize: 13, color: "var(--color-ink-2)", marginTop: 6 }}>{meal.notes}</div>
-          )}
-          {meal.funFact && (
-            <div style={{
-              marginTop: 8, fontSize: 12,
-              color: "var(--color-amber)",
-              fontStyle: "italic",
-              borderLeft: "2px solid var(--color-amber)",
-              paddingLeft: 8,
-            }}>
-              {meal.funFact}
-            </div>
-          )}
+    <div className="pp-meal-card">
+      <div className="pp-meal-card-row">
+        <div className="pp-meal-card-body">
+          <div className="pp-meal-card-title">{meal.dish}</div>
+          <div className="pp-meal-card-date">{date}</div>
+          {meal.notes && <div className="pp-meal-card-notes">{meal.notes}</div>}
+          {meal.funFact && <div className="pp-meal-card-fact">{meal.funFact}</div>}
         </div>
         <button
+          type="button"
           onClick={() => onDelete(meal.mealId)}
           title="Delete"
-          style={{
-            flexShrink: 0, marginLeft: 10, background: "none", border: "none",
-            cursor: "pointer", color: "var(--color-ink-3)",
-            fontSize: 15, padding: "2px 4px", lineHeight: 1,
-            transition: "color 0.15s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-red)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-ink-3)")}
+          className="pp-icon-btn pp-icon-btn-danger"
+          aria-label="Delete dish"
         >
           ×
         </button>
