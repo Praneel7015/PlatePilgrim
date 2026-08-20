@@ -12,7 +12,10 @@ const svg = `
 <svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <clipPath id="globeClip">
-      <circle cx="470" cy="300" r="188"/>
+      <circle cx="400" cy="286" r="178"/>
+    </clipPath>
+    <clipPath id="passClip">
+      <rect x="0" y="0" width="372" height="128" rx="8"/>
     </clipPath>
   </defs>
 
@@ -26,37 +29,76 @@ const svg = `
   <circle cx="1120" cy="70" r="70" fill="none" stroke="#D4860C" stroke-width="1.5" stroke-opacity="0.16"/>
 
   <!-- ── Globe ─────────────────────────────────────────────────────── -->
-  <circle cx="470" cy="300" r="188" fill="#6EA8C4"/>
+  <circle cx="400" cy="286" r="178" fill="#6EA8C4"/>
 
   <g clip-path="url(#globeClip)">
-    <path d="M318 228 C352 188, 412 182, 444 214 C470 240, 456 274, 424 292 C386 314, 338 306, 316 274 C304 254, 300 244, 318 228Z" fill="#067A5F"/>
-    <path d="M392 318 C418 312, 438 328, 442 354 C446 388, 428 436, 404 456 C382 472, 366 452, 372 424 C378 396, 372 358, 392 318Z" fill="#067A5F"/>
-    <path d="M486 208 C508 198, 536 206, 546 228 C554 248, 538 260, 516 258 C494 256, 476 230, 486 208Z" fill="#067A5F"/>
-    <path d="M508 248 C548 236, 578 262, 582 300 C588 344, 566 392, 538 412 C508 432, 488 402, 494 366 C500 330, 486 272, 508 248Z" fill="#067A5F"/>
-    <path d="M556 192 C616 172, 684 190, 710 228 C732 260, 720 296, 680 306 C644 316, 606 290, 582 256 C564 232, 544 208, 556 192Z" fill="#067A5F"/>
-    <path d="M676 372 C704 364, 728 378, 732 398 C736 418, 714 432, 690 428 C668 424, 656 388, 676 372Z" fill="#067A5F"/>
+    <path d="M258 218 C290 180, 348 174, 378 204 C402 228, 390 260, 360 276 C324 296, 278 288, 258 258 C246 240, 242 230, 258 218Z" fill="#067A5F"/>
+    <path d="M328 304 C352 298, 370 314, 374 338 C378 370, 362 414, 340 432 C320 446, 306 428, 312 402 C318 376, 312 340, 328 304Z" fill="#067A5F"/>
+    <path d="M416 198 C436 188, 462 196, 472 216 C480 234, 466 246, 446 244 C426 242, 408 218, 416 198Z" fill="#067A5F"/>
+    <path d="M438 236 C476 226, 504 250, 508 286 C514 326, 494 372, 468 390 C440 408, 422 380, 428 346 C434 312, 420 258, 438 236Z" fill="#067A5F"/>
+    <path d="M486 182 C542 164, 606 180, 630 216 C650 246, 640 280, 602 290 C568 300, 532 276, 510 244 C494 222, 476 198, 486 182Z" fill="#067A5F"/>
+    <path d="M600 354 C626 346, 648 360, 652 378 C656 396, 636 408, 614 404 C594 400, 582 368, 600 354Z" fill="#067A5F"/>
   </g>
 
   <g fill="none" stroke="#F6F1E8" stroke-opacity="0.4" stroke-width="1.3">
-    <ellipse cx="470" cy="300" rx="66" ry="188"/>
-    <ellipse cx="470" cy="300" rx="132" ry="188"/>
-    <line x1="282" y1="300" x2="658" y2="300"/>
-    <ellipse cx="470" cy="300" rx="188" ry="66"/>
-    <ellipse cx="470" cy="300" rx="188" ry="122"/>
+    <ellipse cx="400" cy="286" rx="62" ry="178"/>
+    <ellipse cx="400" cy="286" rx="124" ry="178"/>
+    <line x1="222" y1="286" x2="578" y2="286"/>
+    <ellipse cx="400" cy="286" rx="178" ry="62"/>
+    <ellipse cx="400" cy="286" rx="178" ry="116"/>
   </g>
-  <circle cx="470" cy="300" r="188" fill="none" stroke="#1A2744" stroke-width="6"/>
+  <circle cx="400" cy="286" r="178" fill="none" stroke="#1A2744" stroke-width="6"/>
 
   <!-- ── Passport overlapping the globe ────────────────────────────── -->
-  <g transform="translate(690 148) rotate(-8)">
-    <rect x="16" y="12" width="198" height="270" rx="9" fill="#FAF7F0" stroke="#D2CBBE" stroke-width="2"/>
-    <rect x="0" y="0" width="198" height="270" rx="9" fill="#1A2744"/>
-    <rect x="14" y="14" width="170" height="242" rx="5" fill="none" stroke="#D4860C" stroke-width="1.8"/>
-    <rect x="22" y="22" width="154" height="226" rx="3" fill="none" stroke="#D4860C" stroke-width="0.9" stroke-dasharray="4 3.5"/>
-    <circle cx="99" cy="118" r="42" fill="none" stroke="#D4860C" stroke-width="2.8"/>
-    <circle cx="99" cy="118" r="33" fill="none" stroke="#D4860C" stroke-width="1.1" stroke-dasharray="4 3"/>
-    <circle cx="99" cy="118" r="16" fill="none" stroke="#D4860C" stroke-width="1.5"/>
-    <ellipse cx="99" cy="118" rx="7" ry="16" fill="none" stroke="#D4860C" stroke-width="1.2"/>
-    <line x1="83" y1="118" x2="115" y2="118" stroke="#D4860C" stroke-width="1.2"/>
+  <g transform="translate(590 118) rotate(-8)">
+    <rect x="16" y="12" width="186" height="252" rx="9" fill="#FAF7F0" stroke="#D2CBBE" stroke-width="2"/>
+    <rect x="0" y="0" width="186" height="252" rx="9" fill="#1A2744"/>
+    <rect x="14" y="14" width="158" height="224" rx="5" fill="none" stroke="#D4860C" stroke-width="1.8"/>
+    <rect x="22" y="22" width="142" height="208" rx="3" fill="none" stroke="#D4860C" stroke-width="0.9" stroke-dasharray="4 3.5"/>
+    <circle cx="93" cy="110" r="40" fill="none" stroke="#D4860C" stroke-width="2.8"/>
+    <circle cx="93" cy="110" r="31" fill="none" stroke="#D4860C" stroke-width="1.1" stroke-dasharray="4 3"/>
+    <circle cx="93" cy="110" r="15" fill="none" stroke="#D4860C" stroke-width="1.5"/>
+    <ellipse cx="93" cy="110" rx="6.5" ry="15" fill="none" stroke="#D4860C" stroke-width="1.2"/>
+    <line x1="78" y1="110" x2="108" y2="110" stroke="#D4860C" stroke-width="1.2"/>
+  </g>
+
+  <!-- ── Boarding pass ─────────────────────────────────────────────── -->
+  <g transform="translate(318 348) rotate(6)">
+    <g clip-path="url(#passClip)">
+      <rect x="0" y="0" width="372" height="128" rx="8" fill="#FFFBFC"/>
+      <rect x="0" y="0" width="372" height="30" fill="#DC3220"/>
+      <!-- field blocks instead of tiny text -->
+      <rect x="18" y="48" width="72" height="8" rx="2" fill="#D6D0C6"/>
+      <rect x="18" y="64" width="118" height="14" rx="2" fill="#1A2744"/>
+      <rect x="18" y="92" width="52" height="8" rx="2" fill="#D6D0C6"/>
+      <rect x="18" y="106" width="78" height="10" rx="2" fill="#5A5F6C"/>
+      <rect x="150" y="48" width="52" height="8" rx="2" fill="#D6D0C6"/>
+      <rect x="150" y="64" width="64" height="14" rx="2" fill="#1A2744"/>
+      <rect x="150" y="92" width="40" height="8" rx="2" fill="#D6D0C6"/>
+      <rect x="150" y="106" width="48" height="10" rx="2" fill="#5A5F6C"/>
+      <!-- plane mark -->
+      <path d="M236 58 L268 72 L236 86 L242 72 Z" fill="#DC3220"/>
+      <rect x="220" y="70" width="64" height="4" rx="2" fill="#DC3220"/>
+    </g>
+    <rect x="0" y="0" width="372" height="128" rx="8" fill="none" stroke="#1A2744" stroke-width="4"/>
+    <!-- perforation + stub -->
+    <line x1="278" y1="8" x2="278" y2="120" stroke="#1A2744" stroke-width="1.6" stroke-dasharray="3.5 4"/>
+    <circle cx="278" cy="0" r="9" fill="#F6F1E8"/>
+    <circle cx="278" cy="128" r="9" fill="#F6F1E8"/>
+    <!-- barcode on stub -->
+    <g fill="#1A2744">
+      <rect x="292" y="42" width="3" height="62"/>
+      <rect x="298" y="42" width="2" height="62"/>
+      <rect x="303" y="42" width="5" height="62"/>
+      <rect x="311" y="42" width="2" height="62"/>
+      <rect x="316" y="42" width="3" height="62"/>
+      <rect x="322" y="42" width="2" height="62"/>
+      <rect x="327" y="42" width="6" height="62"/>
+      <rect x="336" y="42" width="2" height="62"/>
+      <rect x="341" y="42" width="4" height="62"/>
+      <rect x="348" y="42" width="2" height="62"/>
+      <rect x="353" y="42" width="3" height="62"/>
+    </g>
   </g>
 
   <!-- Title lockup -->
