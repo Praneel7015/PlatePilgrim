@@ -9,14 +9,70 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  AWS_REGION: ap-south-1
+  FRONTEND_BUCKET: platepilgrimstack-platepilgrimfrontend30f355f1-x0xeym3tgxdj
+  CLOUDFRONT_DIST_ID: E3RU927NEUSUF1
+
 jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      infra: ${{ steps.filter.outputs.infra }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check which trees changed
+        id: filter
+        run: |
+          set -euo pipefail
+
+          # Manual runs always deploy both
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "infra=true" >> "$GITHUB_OUTPUT"
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+            echo "workflow_dispatch — deploying infra and frontend"
+            exit 0
+          fi
+
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "infra=true" >> "$GITHUB_OUTPUT"
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+            echo "No previous commit — deploying both"
+            exit 0
+          fi
+
+          CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" || true)
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          INFRA=false
+          FRONTEND=false
+
+          if echo "$CHANGED" | grep -qE '^(infra/|backend/|\.github/workflows/)'; then
+            INFRA=true
+          fi
+          if echo "$CHANGED" | grep -qE '^(frontend/|\.github/workflows/)'; then
+            FRONTEND=true
+          fi
+
+          echo "infra=$INFRA" >> "$GITHUB_OUTPUT"
+          echo "frontend=$FRONTEND" >> "$GITHUB_OUTPUT"
+          echo "infra=$INFRA frontend=$FRONTEND"
+
   deploy-infra:
     name: CDK deploy infra
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
     outputs:
       bucket: ${{ steps.cdk.outputs.bucket }}
       distribution_id: ${{ steps.cdk.outputs.distribution_id }}
-      api_endpoint: ${{ steps.cdk.outputs.api_endpoint }}
     steps:
       - uses: actions/checkout@v4
 
@@ -37,27 +93,29 @@ jobs:
         run: npm ci
         working-directory: infra
 
-      - name: CDK bootstrap (idempotent)
-        run: npx cdk bootstrap
-        working-directory: infra
-
       - name: CDK deploy
         id: cdk
-        run: |
-          OUTPUT=$(npx cdk deploy --require-approval never --outputs-file cdk-outputs.json 2>&1)
-          echo "$OUTPUT"
-          BUCKET=$(node -e "const o=require('./cdk-outputs.json'); console.log(o.PlatePilgrimStack.FrontendBucketName)")
-          DIST_ID=$(node -e "const o=require('./cdk-outputs.json'); console.log(o.PlatePilgrimStack.CloudFrontDistributionId)")
-          API=$(node -e "const o=require('./cdk-outputs.json'); console.log(o.PlatePilgrimStack.ApiEndpoint)")
-          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
-          echo "distribution_id=$DIST_ID" >> $GITHUB_OUTPUT
-          echo "api_endpoint=$API" >> $GITHUB_OUTPUT
         working-directory: infra
+        run: |
+          set -euo pipefail
+          npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+          node -e '
+            const o = require("./cdk-outputs.json").PlatePilgrimStack;
+            const fs = require("fs");
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, "bucket=" + o.FrontendBucketName + "\n");
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, "distribution_id=" + o.CloudFrontDistributionId + "\n");
+          '
 
   deploy-frontend:
     name: Build & deploy frontend
     runs-on: ubuntu-latest
-    needs: deploy-infra
+    needs: [changes, deploy-infra]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.changes.result == 'success' &&
+      needs.changes.outputs.frontend == 'true' &&
+      (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
     steps:
       - uses: actions/checkout@v4
 
@@ -91,11 +149,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      - name: Sync to S3
+      - name: Sync changed files to S3
         run: |
           BUCKET="${{ needs.deploy-infra.outputs.bucket }}"
-          # Fallback to known bucket if CDK outputs step was skipped
-          BUCKET="${BUCKET:-platepilgrimstack-platepilgrimfrontend30f355f1-x0xeym3tgxdj}"
+          BUCKET="${BUCKET:-$FRONTEND_BUCKET}"
+          # s3 sync only uploads files whose contents changed
           aws s3 sync frontend/dist "s3://$BUCKET" \
             --delete \
             --cache-control "max-age=60"
@@ -103,7 +161,7 @@ jobs:
       - name: Invalidate CloudFront
         run: |
           DIST_ID="${{ needs.deploy-infra.outputs.distribution_id }}"
-          DIST_ID="${DIST_ID:-E3RU927NEUSUF1}"
+          DIST_ID="${DIST_ID:-$CLOUDFRONT_DIST_ID}"
           aws cloudfront create-invalidation \
             --distribution-id "$DIST_ID" \
             --paths "/*"
