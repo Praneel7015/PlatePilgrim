@@ -60,11 +60,11 @@ const svg = `
   </g>
 
   <!-- Title lockup -->
-  <text x="600" y="568" text-anchor="middle"
+  <text x="600" y="560" text-anchor="middle"
         font-family="Segoe UI, Arial, sans-serif"
-        font-size="52" font-weight="700" letter-spacing="-0.8"
-        fill="#111318">PlatePilgrim</text>
-  <text x="600" y="604" text-anchor="middle"
+        font-size="36" font-weight="700" letter-spacing="-0.4"
+        fill="#111318">Full Stack Challenge : PlatePilgrim</text>
+  <text x="600" y="598" text-anchor="middle"
         font-family="Segoe UI, Arial, sans-serif"
         font-size="18" font-weight="400"
         fill="#5A5F6C">Turn every meal into a passport stamp.</text>
