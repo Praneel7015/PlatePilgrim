@@ -1,46 +1,141 @@
 @import "tailwindcss";
 
+/* ── Design tokens ─────────────────────────────────────────────────── */
 @theme {
-  --color-chili: #C0392B;
-  --color-saffron: #F39C12;
-  --color-navy: #2C3E50;
-  --color-parchment: #F5F0E8;
-  --color-parchment-dark: #E8E0D0;
-  --color-ink: #1a252f;
+  --font-family-display: "Syne", sans-serif;
+  --font-family-body:    "DM Sans", sans-serif;
 
-  --font-family-display: "Playfair Display", "Georgia", serif;
-  --font-family-body: "Inter", "system-ui", sans-serif;
+  /* Light */
+  --color-bg:        #F7F7F5;
+  --color-surface:   #FFFFFF;
+  --color-surface-2: #F2F1EE;
+  --color-ink:       #111318;
+  --color-ink-2:     #4B5060;
+  --color-ink-3:     #9299A8;
+  --color-border:    #E5E4E0;
+  --color-red:       #DC3220;
+  --color-red-hover: #B82A1A;
+  --color-amber:     #D4860C;
+  --color-teal:      #067A5F;
+
+  /* Map — muted so explored/stamped read as signal against noise */
+  --color-map-ocean:    #C2D4E0;
+  --color-map-land:     #D5CFC6;
+  --color-map-explored: #DC3220;
+  --color-map-stamped:  #067A5F;
 }
 
-/* Dark mode using the class strategy */
-:root {
-  color-scheme: light dark;
+/* ── Dark mode ─────────────────────────────────────────────────────── */
+.dark {
+  --color-bg:        #0D0F14;
+  --color-surface:   #161A22;
+  --color-surface-2: #1C2030;
+  --color-ink:       #E8E4DC;
+  --color-ink-2:     #A4AABB;
+  --color-ink-3:     #555C6E;
+  --color-border:    #242838;
+  --color-red:       #E84030;
+  --color-red-hover: #C73220;
+  --color-amber:     #E09620;
+  --color-teal:      #0A9870;
+
+  --color-map-ocean:    #182030;
+  --color-map-land:     #222838;
+  --color-map-explored: #E84030;
+  --color-map-stamped:  #0A9870;
 }
+
+/* ── Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
 
 body {
   font-family: var(--font-family-body);
-  background-color: var(--color-parchment);
-  color: var(--color-navy);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.dark body {
-  background-color: var(--color-ink);
-  color: var(--color-parchment);
+/* ── Glass surface ─────────────────────────────────────────────────── */
+.glass {
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-/* Vintage stamp border utility */
-.stamp-border {
-  border: 3px dashed var(--color-saffron);
+/* ── CSS spinner (replaces emoji spin in DareCard) ─────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-red);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Map tooltip ───────────────────────────────────────────────────── */
+.map-tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--color-ink);
+  color: var(--color-bg);
+  font-family: var(--font-family-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 60;
+  transform: translate(-50%, calc(-100% - 8px));
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ── Animations ────────────────────────────────────────────────────── */
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* The signature moment — passport stamp pressed into paper */
+@keyframes stamp-press {
+  0%   { transform: rotate(-3deg) scale(1.5);  opacity: 0; }
+  55%  { transform: rotate(-3deg) scale(0.93); opacity: 1; }
+  75%  { transform: rotate(-3deg) scale(1.05); opacity: 1; }
+  100% { transform: rotate(-3deg) scale(1);    opacity: 1; }
+}
+
+.animate-slide-down  { animation: slide-down  0.25s ease both; }
+.animate-slide-up    { animation: slide-up    0.30s ease both; }
+.animate-fade-in     { animation: fade-in     0.20s ease both; }
+.animate-stamp-press { animation: stamp-press 0.55s cubic-bezier(0.22, 1.2, 0.36, 1) both; }
+
+/* ── Scrollbar ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* ── Focus ─────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-red);
+  outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Page-turn animation on cards */
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.slide-up {
-  animation: slide-up 0.3s ease both;
+/* ── Reduced motion ────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

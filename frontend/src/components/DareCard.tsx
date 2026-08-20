@@ -1,109 +1,159 @@
 import type { DareResponse } from "../api";
+import { getCountry } from "../countries";
 
 interface Props {
   dare: DareResponse | null;
   loading: boolean;
   onClose: () => void;
-  onLogDish: () => void;
+  onTry: (countryCode: string) => void;
 }
 
-const DIFFICULTY_LABEL: Record<number, string> = {
-  1: "Beginner friendly",
-  2: "Intermediate",
-  3: "Adventurous",
+const DIFFICULTY_META: Record<number, { label: string; color: string }> = {
+  1: { label: "Easy",         color: "var(--color-teal)"  },
+  2: { label: "Intermediate", color: "var(--color-amber)" },
+  3: { label: "Adventurous",  color: "var(--color-red)"   },
 };
 
-const DIFFICULTY_COLOR: Record<number, string> = {
-  1: "text-green-600 dark:text-green-400",
-  2: "text-[#F39C12]",
-  3: "text-[#C0392B]",
-};
+export default function DareCard({ dare, loading, onClose, onTry }: Props) {
+  const dareCode = dare?.country?.code ?? "";
+  const country = dareCode ? getCountry(dareCode) : null;
+  const diff = DIFFICULTY_META[country?.difficulty ?? dare?.country?.difficulty ?? 1];
 
-export default function DareCard({ dare, loading, onClose, onLogDish }: Props) {
   return (
-    <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-[#F5F0E8] dark:bg-[#1e2f3d] w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl p-6 slide-up max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-serif text-xl font-bold text-[#2C3E50] dark:text-[#F5F0E8] flex items-center gap-2">
-            <span>🎲</span> Dare Me a Dish
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="animate-fade-in"
+        style={{
+          position: "fixed", inset: 0, zIndex: 40,
+          background: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)",
+        }}
+      />
+
+      {/* Modal */}
+      <div
+        className="animate-slide-up"
+        style={{
+          position: "fixed", zIndex: 50,
+          bottom: 0, left: 0, right: 0,
+          borderRadius: "20px 20px 0 0",
+          background: "var(--color-surface)",
+          borderTop: "1px solid var(--color-border)",
+          padding: "28px 24px 40px",
+          maxHeight: "90dvh", overflowY: "auto",
+        }}
+      >
+        {/* Drag handle */}
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: "var(--color-border)", margin: "0 auto 24px" }} />
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <h2 style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: 20, color: "var(--color-ink)", margin: 0 }}>
+            🎲 Today's dare
           </h2>
           <button
             onClick={onClose}
-            className="text-[#2C3E50]/50 dark:text-white/50 hover:text-[#C0392B] transition-colors text-xl leading-none"
-            aria-label="Close"
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "var(--color-ink-3)", padding: "4px 8px", lineHeight: 1 }}
           >
             ×
           </button>
         </div>
 
-        {/* Loading state */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="text-4xl animate-spin inline-block mb-4">🌍</div>
-            <p className="text-[#2C3E50]/60 dark:text-white/60 text-sm">
-              Spinning the globe…
-            </p>
+        {loading ? (
+          <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}>
+            <div className="spinner" />
           </div>
-        )}
-
-        {/* All explored */}
-        {!loading && dare?.allExplored && (
-          <div className="text-center py-10">
-            <div className="text-5xl mb-4">🏆</div>
-            <p className="font-serif text-lg font-bold text-[#2C3E50] dark:text-[#F5F0E8] mb-2">
-              World Tour Complete!
-            </p>
-            <p className="text-sm text-[#2C3E50]/60 dark:text-white/60">
-              {dare.message}
-            </p>
-          </div>
-        )}
-
-        {/* Dare content */}
-        {!loading && dare && !dare.allExplored && dare.country && (
-          <>
+        ) : dare ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {/* Country banner */}
-            <div className="stamp-border rounded-xl p-4 mb-5 bg-white/50 dark:bg-white/5 text-center">
-              <span className="text-4xl">{dare.country.emoji}</span>
-              <h3 className="font-serif text-2xl font-bold text-[#2C3E50] dark:text-[#F5F0E8] mt-1">
-                {dare.country.name}
-              </h3>
-              <p className="text-sm text-[#2C3E50]/60 dark:text-white/50 mb-1">
-                {dare.country.cuisine} cuisine · {dare.country.continent}
-              </p>
-              <span
-                className={`text-xs font-medium ${DIFFICULTY_COLOR[dare.country.difficulty] ?? "text-[#2C3E50]"}`}
-              >
-                {DIFFICULTY_LABEL[dare.country.difficulty] ?? ""}
-              </span>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 14,
+              background: "var(--color-surface-2)",
+              borderRadius: 14, padding: "16px 18px",
+              border: "1px solid var(--color-border)",
+            }}>
+              <span style={{ fontSize: 36 }}>{country?.emoji ?? dare.country?.emoji ?? "🌍"}</span>
+              <div>
+                <h3 style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: 18, color: "var(--color-ink)", margin: "0 0 4px" }}>
+                  {country?.name ?? dare.country?.name ?? dareCode}
+                </h3>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 13, color: "var(--color-ink-2)" }}>
+                    {country?.name ?? dare.country?.name} · {country?.cuisine ?? dare.country?.cuisine}
+                  </span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700,
+                    fontFamily: "var(--font-family-display)",
+                    color: diff.color,
+                    background: `color-mix(in srgb, ${diff.color} 10%, transparent)`,
+                    border: `1px solid color-mix(in srgb, ${diff.color} 30%, transparent)`,
+                    borderRadius: 6, padding: "2px 8px",
+                    textTransform: "uppercase", letterSpacing: "0.06em",
+                  }}>
+                    {diff.label}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            {/* Recipe from Bedrock */}
+            {/* Recipe */}
             {dare.recipe && (
-              <div className="bg-white/60 dark:bg-white/10 rounded-xl p-4 mb-5 text-sm text-[#2C3E50] dark:text-[#F5F0E8] leading-relaxed whitespace-pre-wrap">
-                {dare.recipe}
+              <div style={{
+                background: "var(--color-surface-2)",
+                borderLeft: "3px solid var(--color-amber)",
+                borderRadius: "0 10px 10px 0",
+                padding: "14px 16px",
+                border: "1px solid var(--color-border)",
+                borderLeftColor: "var(--color-amber)",
+              }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-amber)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                  Beginner recipe
+                </p>
+                <p style={{ fontSize: 14, color: "var(--color-ink-2)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>
+                  {dare.recipe}
+                </p>
               </div>
             )}
 
-            {/* Actions */}
-            <div className="flex gap-3">
+            {/* Action buttons */}
+            <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
               <button
-                onClick={onLogDish}
-                className="flex-1 bg-[#C0392B] hover:bg-[#a93226] text-white font-semibold py-2.5 rounded-lg text-sm transition-colors shadow"
+                onClick={() => onTry(dareCode)}
+                style={{
+                  flex: 1, padding: "13px 0", borderRadius: 10,
+                  background: "var(--color-red)", color: "#fff",
+                  fontFamily: "var(--font-family-display)", fontWeight: 700,
+                  fontSize: 14, border: "none", cursor: "pointer",
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-red-hover)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-red)")}
               >
-                Accept the Dare 🍽️
+                Try it
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 border border-[#2C3E50]/20 dark:border-white/20 text-[#2C3E50] dark:text-white font-semibold py-2.5 rounded-lg text-sm transition-colors hover:bg-[#2C3E50]/5"
+                style={{
+                  flex: 1, padding: "13px 0", borderRadius: 10,
+                  background: "none", color: "var(--color-ink-2)",
+                  fontFamily: "var(--font-family-display)", fontWeight: 700,
+                  fontSize: 14,
+                  border: "1.5px solid var(--color-border)",
+                  cursor: "pointer", transition: "border-color 0.15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--color-ink-2)")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
               >
-                Maybe Later
+                Skip
               </button>
             </div>
-          </>
+          </div>
+        ) : (
+          <p style={{ textAlign: "center", color: "var(--color-ink-3)", padding: "32px 0", fontSize: 14 }}>
+            No dare available. Try again later.
+          </p>
         )}
       </div>
-    </div>
+    </>
   );
 }

@@ -1,178 +1,173 @@
 import { useState } from "react";
 import { api } from "../api";
-import type { LogMealRequest, Meal } from "../api";
-
-// Simple country list for the picker — matching our backend COUNTRIES list
-const COUNTRIES = [
-  { code: "IT", name: "Italy", emoji: "🍝" },
-  { code: "JP", name: "Japan", emoji: "🍣" },
-  { code: "IN", name: "India", emoji: "🍛" },
-  { code: "MX", name: "Mexico", emoji: "🌮" },
-  { code: "FR", name: "France", emoji: "🥐" },
-  { code: "CN", name: "China", emoji: "🥟" },
-  { code: "TH", name: "Thailand", emoji: "🍜" },
-  { code: "GR", name: "Greece", emoji: "🫒" },
-  { code: "ES", name: "Spain", emoji: "🥘" },
-  { code: "MA", name: "Morocco", emoji: "🫙" },
-  { code: "ET", name: "Ethiopia", emoji: "🫓" },
-  { code: "NG", name: "Nigeria", emoji: "🍲" },
-  { code: "EG", name: "Egypt", emoji: "🧆" },
-  { code: "ZA", name: "South Africa", emoji: "🥩" },
-  { code: "SN", name: "Senegal", emoji: "🍚" },
-  { code: "GH", name: "Ghana", emoji: "🍛" },
-  { code: "TN", name: "Tunisia", emoji: "🌶️" },
-  { code: "KE", name: "Kenya", emoji: "🍖" },
-  { code: "BR", name: "Brazil", emoji: "🥩" },
-  { code: "PE", name: "Peru", emoji: "🍋" },
-  { code: "AR", name: "Argentina", emoji: "🥩" },
-  { code: "CO", name: "Colombia", emoji: "🫘" },
-  { code: "CU", name: "Cuba", emoji: "🍖" },
-  { code: "JM", name: "Jamaica", emoji: "🌶️" },
-  { code: "CL", name: "Chile", emoji: "🫘" },
-  { code: "US", name: "United States", emoji: "🍔" },
-  { code: "CA", name: "Canada", emoji: "🍁" },
-  { code: "TR", name: "Turkey", emoji: "🥙" },
-  { code: "LB", name: "Lebanon", emoji: "🧆" },
-  { code: "IR", name: "Iran", emoji: "🍚" },
-  { code: "SA", name: "Saudi Arabia", emoji: "🍖" },
-  { code: "VN", name: "Vietnam", emoji: "🍜" },
-  { code: "KR", name: "South Korea", emoji: "🥢" },
-  { code: "PH", name: "Philippines", emoji: "🍖" },
-  { code: "ID", name: "Indonesia", emoji: "🍚" },
-  { code: "MY", name: "Malaysia", emoji: "🍜" },
-  { code: "SG", name: "Singapore", emoji: "🦞" },
-  { code: "PK", name: "Pakistan", emoji: "🍛" },
-  { code: "BD", name: "Bangladesh", emoji: "🐟" },
-  { code: "LK", name: "Sri Lanka", emoji: "🌴" },
-  { code: "GB", name: "United Kingdom", emoji: "🫖" },
-  { code: "DE", name: "Germany", emoji: "🌭" },
-  { code: "PT", name: "Portugal", emoji: "🐟" },
-  { code: "PL", name: "Poland", emoji: "🥣" },
-  { code: "RU", name: "Russia", emoji: "🥣" },
-  { code: "UA", name: "Ukraine", emoji: "🥣" },
-  { code: "HU", name: "Hungary", emoji: "🫕" },
-  { code: "SE", name: "Sweden", emoji: "🐟" },
-  { code: "AU", name: "Australia", emoji: "🦘" },
-  { code: "NZ", name: "New Zealand", emoji: "🥝" },
-  { code: "IL", name: "Israel", emoji: "🧆" },
-  { code: "GE", name: "Georgia", emoji: "🥟" },
-  { code: "MN", name: "Mongolia", emoji: "🥩" },
-];
+import type { Meal } from "../api";
+import { COUNTRIES } from "../countries";
 
 interface Props {
   onClose: () => void;
   onLogged: (meal: Meal, stampAwarded: boolean) => void;
+  preselectedCountry?: string;
 }
 
-export default function MealLogger({ onClose, onLogged }: Props) {
+export default function MealLogger({ onClose, onLogged, preselectedCountry }: Props) {
+  const [country, setCountry] = useState(preselectedCountry ?? "");
   const [dish, setDish] = useState("");
-  const [countryCode, setCountryCode] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedCountry = COUNTRIES.find((c) => c.code === countryCode);
+  const sortedCountries = [...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!dish.trim() || !countryCode) {
-      setError("Please fill in the dish name and select a country.");
-      return;
-    }
-    setSubmitting(true);
     setError(null);
+    if (!country) { setError("Please select a country."); return; }
+    if (!dish.trim()) { setError("Please enter a dish name."); return; }
+
+    setSubmitting(true);
     try {
-      const payload: LogMealRequest = {
+      const selectedCountryMeta = COUNTRIES.find((c) => c.code === country);
+      const result = await api.logMeal({
+        countryCode: country,
+        countryName: selectedCountryMeta?.name ?? country,
         dish: dish.trim(),
-        countryCode,
-        countryName: selectedCountry?.name ?? countryCode,
         notes: notes.trim(),
-      };
-      const res = await api.logMeal(payload);
-      onLogged(res.meal, res.stampAwarded);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      });
+      onLogged(result.meal, result.stampAwarded);
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-[#F5F0E8] dark:bg-[#1e2f3d] w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl p-6 slide-up">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-serif text-xl font-bold text-[#2C3E50] dark:text-[#F5F0E8]">
-            Log a Dish
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="animate-fade-in"
+        style={{
+          position: "fixed", inset: 0, zIndex: 40,
+          background: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)",
+        }}
+      />
+
+      {/* Modal */}
+      <div
+        className="animate-slide-up"
+        style={{
+          position: "fixed", zIndex: 50,
+          /* Bottom-sheet on mobile, centered on desktop */
+          bottom: 0, left: 0, right: 0,
+          borderRadius: "20px 20px 0 0",
+          background: "var(--color-surface)",
+          borderTop: "1px solid var(--color-border)",
+          padding: "28px 24px 40px",
+          maxHeight: "90dvh", overflowY: "auto",
+        }}
+      >
+        {/* Drag handle */}
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: "var(--color-border)", margin: "0 auto 24px" }} />
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <h2 style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: 20, color: "var(--color-ink)", margin: 0 }}>
+            Log a dish
           </h2>
           <button
             onClick={onClose}
-            className="text-[#2C3E50]/50 dark:text-white/50 hover:text-[#C0392B] transition-colors text-xl leading-none"
-            aria-label="Close"
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "var(--color-ink-3)", padding: "4px 8px", lineHeight: 1 }}
           >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          {/* Country */}
           <div>
-            <label className="block text-sm font-medium text-[#2C3E50] dark:text-[#F5F0E8] mb-1">
-              Dish name *
-            </label>
-            <input
-              type="text"
-              value={dish}
-              onChange={(e) => setDish(e.target.value)}
-              placeholder="e.g. Pad Thai, Tagine, Ceviche…"
-              className="w-full border border-[#2C3E50]/20 dark:border-white/20 bg-white/70 dark:bg-white/10 rounded-lg px-3 py-2 text-sm text-[#2C3E50] dark:text-white placeholder-[#2C3E50]/40 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#C0392B]"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] dark:text-[#F5F0E8] mb-1">
-              Country *
-            </label>
+            <label style={labelStyle}>Country / cuisine</label>
             <select
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="w-full border border-[#2C3E50]/20 dark:border-white/20 bg-white/70 dark:bg-white/10 rounded-lg px-3 py-2 text-sm text-[#2C3E50] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C0392B]"
-              required
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              style={inputStyle}
             >
               <option value="">Select a country…</option>
-              {COUNTRIES.map((c) => (
+              {sortedCountries.map((c) => (
                 <option key={c.code} value={c.code}>
-                  {c.emoji} {c.name}
+                  {c.emoji} {c.name} — {c.cuisine}
                 </option>
               ))}
             </select>
           </div>
 
+          {/* Dish name */}
           <div>
-            <label className="block text-sm font-medium text-[#2C3E50] dark:text-[#F5F0E8] mb-1">
-              Notes <span className="font-normal opacity-60">(optional)</span>
-            </label>
+            <label style={labelStyle}>Dish name</label>
+            <input
+              type="text"
+              placeholder="e.g. Pad Thai, Tagine, Pierogi…"
+              value={dish}
+              onChange={(e) => setDish(e.target.value)}
+              style={inputStyle}
+              autoFocus
+            />
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label style={labelStyle}>Notes <span style={{ color: "var(--color-ink-3)", fontWeight: 400 }}>(optional)</span></label>
             <textarea
+              placeholder="Where you had it, how it tasted…"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Where did you have it? How was it?"
-              rows={2}
-              className="w-full border border-[#2C3E50]/20 dark:border-white/20 bg-white/70 dark:bg-white/10 rounded-lg px-3 py-2 text-sm text-[#2C3E50] dark:text-white placeholder-[#2C3E50]/40 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#C0392B] resize-none"
+              rows={3}
+              style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }}
             />
           </div>
 
           {error && (
-            <p className="text-[#C0392B] text-sm">{error}</p>
+            <p style={{ fontSize: 13, color: "var(--color-red)", margin: 0 }}>{error}</p>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[#C0392B] hover:bg-[#a93226] disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow"
+            style={{
+              width: "100%", padding: "14px 0", borderRadius: 10,
+              background: submitting ? "var(--color-border)" : "var(--color-red)",
+              color: submitting ? "var(--color-ink-3)" : "#fff",
+              fontFamily: "var(--font-family-display)", fontWeight: 700,
+              fontSize: 15, border: "none", cursor: submitting ? "default" : "pointer",
+              transition: "background 0.15s",
+            }}
           >
-            {submitting ? "Logging…" : "Log Dish ✓"}
+            {submitting ? "Logging…" : "Log this dish"}
           </button>
         </form>
       </div>
-    </div>
+    </>
   );
 }
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: "var(--color-ink-2)",
+  marginBottom: 6,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: "var(--color-surface-2)",
+  border: "1px solid var(--color-border)",
+  borderRadius: 8,
+  padding: "11px 12px",
+  fontSize: 14,
+  color: "var(--color-ink)",
+  outline: "none",
+  fontFamily: "var(--font-family-body)",
+  transition: "border-color 0.15s",
+};

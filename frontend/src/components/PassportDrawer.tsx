@@ -1,136 +1,245 @@
+import { useEffect, useRef } from "react";
 import type { Meal, Stamp } from "../api";
+import { getCountry } from "../countries";
 
 interface Props {
   countryCode: string;
   meals: Meal[];
   stamp: Stamp | null;
   onClose: () => void;
-  onDeleteMeal: (mealId: string) => void;
+  onDeleteMeal: (id: string) => void;
+  onAddDish: () => void;
 }
 
-export default function PassportDrawer({
-  countryCode,
-  meals,
-  stamp,
-  onClose,
-  onDeleteMeal,
-}: Props) {
-  const countryName = meals[0]?.countryName ?? stamp?.countryName ?? countryCode;
+function PassportStamp({ country, stamp, meals }: { country: ReturnType<typeof getCountry>; stamp: Stamp | null; meals: Meal[] }) {
+  const earned = !!stamp;
+  const strokeColor = earned ? "var(--color-amber)" : "var(--color-border)";
+  const stampDate = stamp ? new Date(stamp.earnedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "";
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end">
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+      <svg
+        width="160"
+        height="160"
+        viewBox="0 0 160 160"
+        className={earned ? "animate-stamp-press" : ""}
+        style={{ opacity: earned ? 1 : 0.4 }}
+      >
+        {/* Outer ring */}
+        <circle cx="80" cy="80" r="72" fill="none" stroke={strokeColor} strokeWidth={earned ? 2.5 : 1.5} />
+        {/* Inner dashed ring */}
+        <circle cx="80" cy="80" r="62" fill="none" stroke={strokeColor} strokeWidth={1} strokeDasharray="4 3" />
+
+        {/* Top arc path (country name) */}
+        <defs>
+          <path id="topArc" d="M 14,80 A 66,66 0 0,1 146,80" />
+          <path id="botArc" d="M 22,80 A 58,58 0 0,0 138,80" />
+        </defs>
+        <text fill={strokeColor} fontSize="11" fontFamily="var(--font-family-display)" fontWeight="700" letterSpacing="2">
+          <textPath href="#topArc" startOffset="50%" textAnchor="middle">
+            {(country?.name ?? "").toUpperCase()}
+          </textPath>
+        </text>
+
+        {/* Center content */}
+        <text x="80" y="72" textAnchor="middle" fontSize="28" dominantBaseline="middle">
+          {country?.emoji ?? "🌍"}
+        </text>
+        {earned && (
+          <>
+            <text x="80" y="97" textAnchor="middle" fill={strokeColor} fontSize="9" fontFamily="var(--font-family-display)" fontWeight="700" letterSpacing="3">
+              VISITED
+            </text>
+            <text fill={strokeColor} fontSize="9" fontFamily="var(--font-family-body)" letterSpacing="1">
+              <textPath href="#botArc" startOffset="50%" textAnchor="middle">
+                {stampDate.toUpperCase()}
+              </textPath>
+            </text>
+          </>
+        )}
+      </svg>
+
+      {/* Progress bar if not earned yet */}
+      {!earned && (
+        <div style={{ width: 160 }}>
+          <div style={{ height: 4, borderRadius: 4, background: "var(--color-border)", overflow: "hidden" }}>
+            <div
+              style={{
+                height: "100%", borderRadius: 4,
+                background: "var(--color-amber)",
+                width: `${(Math.min(meals.length, 3) / 3) * 100}%`,
+                transition: "width 0.5s ease",
+              }}
+            />
+          </div>
+          <p style={{ fontSize: 11, color: "var(--color-ink-3)", textAlign: "center", marginTop: 6 }}>
+            {meals.length}/3 dishes · {3 - Math.min(meals.length, 3)} more to earn stamp
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function PassportDrawer({ countryCode, meals, stamp, onClose, onDeleteMeal, onAddDish }: Props) {
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const country = getCountry(countryCode);
+
+  useEffect(() => {
+    // Slide in on mount
+    const el = drawerRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => { el.style.transform = "translateX(0)"; });
+
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  function handleClose() {
+    const el = drawerRef.current;
+    if (!el) { onClose(); return; }
+    el.style.transform = "translateX(100%)";
+    setTimeout(onClose, 280);
+  }
+
+  return (
+    <>
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={handleClose}
+        style={{
+          position: "fixed", inset: 0, zIndex: 40,
+          background: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)",
+        }}
+        className="animate-fade-in"
       />
 
       {/* Drawer */}
-      <div className="relative w-full sm:max-w-sm bg-[#F5F0E8] dark:bg-[#1e2f3d] shadow-2xl flex flex-col slide-up overflow-y-auto">
+      <div
+        ref={drawerRef}
+        style={{
+          position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 50,
+          width: "min(420px, 100vw)",
+          background: "var(--color-surface)",
+          borderLeft: "1px solid var(--color-border)",
+          display: "flex", flexDirection: "column",
+          overflowY: "auto",
+          transform: "translateX(100%)",
+          transition: "transform 0.28s cubic-bezier(0.32, 0, 0.18, 1)",
+          willChange: "transform",
+        }}
+      >
         {/* Header */}
-        <div className="bg-[#2C3E50] dark:bg-[#111c24] text-white px-5 py-4 flex items-start justify-between">
+        <div style={{
+          position: "sticky", top: 0, zIndex: 10,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "16px 20px",
+          background: "var(--color-surface)",
+          borderBottom: "1px solid var(--color-border)",
+        }}>
           <div>
-            <p className="text-xs uppercase tracking-widest text-white/60 mb-0.5">
-              Passport
-            </p>
-            <h2 className="font-serif text-2xl font-bold">{countryName}</h2>
-            <p className="text-sm text-white/60 mt-0.5">
-              {meals.length} dish{meals.length !== 1 ? "es" : ""} logged
+            <h2 style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: 18, color: "var(--color-ink)", margin: 0 }}>
+              {country?.emoji} {country?.name ?? countryCode}
+            </h2>
+            <p style={{ fontSize: 12, color: "var(--color-ink-3)", margin: "2px 0 0" }}>
+              {country?.cuisine} · {country?.continent}
             </p>
           </div>
           <button
-            onClick={onClose}
-            className="text-white/60 hover:text-white transition-colors text-2xl leading-none mt-1"
-            aria-label="Close"
+            onClick={handleClose}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "var(--color-ink-3)", padding: "4px 8px", lineHeight: 1 }}
           >
             ×
           </button>
         </div>
 
-        {/* Stamp area */}
-        <div className="px-5 py-4 border-b border-[#2C3E50]/10 dark:border-white/10">
-          {stamp ? (
-            <div className="stamp-border rounded-xl p-4 text-center bg-[#F39C12]/10">
-              <div className="text-3xl mb-1">🏅</div>
-              <p className="font-serif font-bold text-[#F39C12] text-lg">
-                Stamp Earned!
-              </p>
-              <p className="text-xs text-[#2C3E50]/60 dark:text-white/50 mt-1">
-                {new Date(stamp.earnedAt).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </p>
-            </div>
-          ) : (
-            <div className="rounded-xl p-4 text-center bg-[#2C3E50]/5 dark:bg-white/5 border border-dashed border-[#2C3E50]/20 dark:border-white/20">
-              <div className="text-2xl mb-1 opacity-40">🏅</div>
-              <p className="text-sm text-[#2C3E50]/50 dark:text-white/40">
-                Log {3 - meals.length} more dish{3 - meals.length !== 1 ? "es" : ""} to earn the stamp
-              </p>
-              {/* Progress dots */}
-              <div className="flex justify-center gap-2 mt-2">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className={`w-3 h-3 rounded-full transition-colors ${
-                      i < meals.length
-                        ? "bg-[#F39C12]"
-                        : "bg-[#2C3E50]/20 dark:bg-white/20"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+        {/* Stamp */}
+        <div style={{ padding: "32px 20px 24px", display: "flex", justifyContent: "center", borderBottom: "1px solid var(--color-border)" }}>
+          <PassportStamp country={country} stamp={stamp} meals={meals} />
         </div>
 
-        {/* Meal list */}
-        <div className="flex-1 px-5 py-4 space-y-3">
-          <h3 className="text-xs uppercase tracking-widest text-[#2C3E50]/50 dark:text-white/40 mb-2">
-            Dishes Logged
-          </h3>
-          {meals.length === 0 && (
-            <p className="text-sm text-[#2C3E50]/50 dark:text-white/40 italic">
-              No dishes yet — click a country on the map after logging.
-            </p>
-          )}
-          {meals.map((meal) => (
-            <div
-              key={meal.mealId}
-              className="bg-white/60 dark:bg-white/10 rounded-xl p-3 group"
+        {/* Meal log */}
+        <div style={{ padding: "20px", flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--color-ink-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              Dishes logged
+            </span>
+            <button
+              onClick={onAddDish}
+              style={{
+                fontSize: 12, fontWeight: 600, color: "var(--color-red)",
+                background: "none", border: "none", cursor: "pointer", padding: "2px 6px",
+              }}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[#2C3E50] dark:text-white text-sm truncate">
-                    {meal.dish}
-                  </p>
-                  {meal.notes && (
-                    <p className="text-xs text-[#2C3E50]/60 dark:text-white/50 mt-0.5 line-clamp-2">
-                      {meal.notes}
-                    </p>
-                  )}
-                  {meal.funFact && (
-                    <p className="text-xs text-[#F39C12] mt-1 italic line-clamp-2">
-                      💡 {meal.funFact}
-                    </p>
-                  )}
-                  <p className="text-xs text-[#2C3E50]/40 dark:text-white/30 mt-1">
-                    {new Date(meal.loggedAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <button
-                  onClick={() => onDeleteMeal(meal.mealId)}
-                  className="ml-2 opacity-0 group-hover:opacity-100 text-[#C0392B]/60 hover:text-[#C0392B] transition-all text-sm flex-shrink-0"
-                  aria-label="Delete meal"
-                >
-                  🗑
-                </button>
-              </div>
+              + Add dish
+            </button>
+          </div>
+
+          {meals.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "28px 0", color: "var(--color-ink-3)", fontSize: 14 }}>
+              No dishes logged yet.
             </div>
-          ))}
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {meals.map((meal) => (
+                <MealCard key={meal.mealId} meal={meal} onDelete={onDeleteMeal} />
+              ))}
+            </div>
+          )}
         </div>
+      </div>
+    </>
+  );
+}
+
+function MealCard({ meal, onDelete }: { meal: Meal; onDelete: (id: string) => void }) {
+  const date = new Date(meal.loggedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  return (
+    <div
+      style={{
+        background: "var(--color-surface-2)",
+        border: "1px solid var(--color-border)",
+        borderRadius: 12, padding: "14px 14px",
+        position: "relative",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 600, fontSize: 14, color: "var(--color-ink)", marginBottom: 3 }}>
+            {meal.dish}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--color-ink-3)" }}>{date}</div>
+          {meal.notes && (
+            <div style={{ fontSize: 13, color: "var(--color-ink-2)", marginTop: 6 }}>{meal.notes}</div>
+          )}
+          {meal.funFact && (
+            <div style={{
+              marginTop: 8, fontSize: 12,
+              color: "var(--color-amber)",
+              fontStyle: "italic",
+              borderLeft: "2px solid var(--color-amber)",
+              paddingLeft: 8,
+            }}>
+              {meal.funFact}
+            </div>
+          )}
+        </div>
+        <button
+          onClick={() => onDelete(meal.mealId)}
+          title="Delete"
+          style={{
+            flexShrink: 0, marginLeft: 10, background: "none", border: "none",
+            cursor: "pointer", color: "var(--color-ink-3)",
+            fontSize: 15, padding: "2px 4px", lineHeight: 1,
+            transition: "color 0.15s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-red)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-ink-3)")}
+        >
+          ×
+        </button>
       </div>
     </div>
   );
