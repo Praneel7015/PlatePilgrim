@@ -18,9 +18,9 @@
   --color-amber:     #D4860C;
   --color-teal:      #067A5F;
 
-  /* Map — muted so explored/stamped read as signal against noise */
-  --color-map-ocean:    #C2D4E0;
-  --color-map-land:     #D5CFC6;
+  /* Map — ocean/land must be clearly different; explored/stamped read as signal */
+  --color-map-ocean:    #7AAEC8;   /* real blue — can't be confused with land */
+  --color-map-land:     #E2D4B8;   /* warm parchment — clearly distinct from ocean */
   --color-map-explored: #DC3220;
   --color-map-stamped:  #067A5F;
 }
