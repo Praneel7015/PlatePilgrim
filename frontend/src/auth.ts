@@ -62,8 +62,9 @@ export async function handleCallback(): Promise<void> {
   window.history.replaceState({}, "", "/");
 }
 
+/** JWT for API Gateway — HTTP API authorizer expects the ID token `aud` claim. */
 export function getAccessToken(): string | null {
-  return localStorage.getItem("pp_access_token");
+  return localStorage.getItem("pp_id_token") || localStorage.getItem("pp_access_token");
 }
 
 export function getIdToken(): string | null {

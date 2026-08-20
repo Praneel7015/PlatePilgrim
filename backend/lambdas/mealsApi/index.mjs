@@ -201,7 +201,7 @@ export const handler = async (event) => {
   if (!sub) return json(401, { error: "Unauthorized" });
 
   const method = event.requestContext?.http?.method;
-  const rawPath = event.rawPath || "";
+  const rawPath = (event.rawPath || "").replace(/^\/api/, "") || "/";
   const mealId = event.pathParameters?.mealId;
 
   try {

@@ -207,6 +207,25 @@ export class PlatePilgrimStack extends cdk.Stack {
       encryption: s3.BucketEncryption.S3_MANAGED,
     });
 
+    // CloudFront receives /api/meals but API Gateway routes are /meals.
+    // Strip the prefix before the request hits the origin.
+    const stripApiPrefix = new cloudfront.Function(this, "StripApiPrefix", {
+      functionName: "platepilgrim-strip-api-prefix",
+      comment: "Rewrite /api/* → /* so HTTP API routes match",
+      code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+  if (uri.indexOf('/api/') === 0) {
+    request.uri = uri.substring(4);
+  } else if (uri === '/api') {
+    request.uri = '/';
+  }
+  return request;
+}
+`),
+    });
+
     const distribution = new cloudfront.Distribution(
       this,
       "PlatePilgrimDistribution",
@@ -229,6 +248,12 @@ export class PlatePilgrimStack extends cdk.Stack {
             allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
             originRequestPolicy:
               cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+            functionAssociations: [
+              {
+                function: stripApiPrefix,
+                eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+              },
+            ],
           },
         },
         defaultRootObject: "index.html",
