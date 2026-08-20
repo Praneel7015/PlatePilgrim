@@ -1,4 +1,4 @@
-import { Meal, Stamp } from "../api";
+import type { Meal, Stamp } from "../api";
 
 interface Props {
   countryCode: string;

@@ -6,7 +6,8 @@ import {
   handleCallback,
   getCurrentUser,
 } from "./auth";
-import { api, Meal, Stamp, DareResponse } from "./api";
+import { api } from "./api";
+import type { Meal, Stamp, DareResponse } from "./api";
 import WorldMap from "./components/WorldMap";
 import MealLogger from "./components/MealLogger";
 import DareCard from "./components/DareCard";

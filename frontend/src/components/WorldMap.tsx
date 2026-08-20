@@ -1,4 +1,8 @@
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import type { Feature, GeoJsonProperties, Geometry } from "geojson";
+
+// react-simple-maps injects rsmKey at runtime
+type RSMFeature = Feature<Geometry, GeoJsonProperties> & { rsmKey: string };
 
 // World topojson from public CDN — no local file needed
 const GEO_URL =
@@ -50,8 +54,8 @@ export default function WorldMap({ stampedCodes, exploredCounts, onCountryClick 
         style={{ width: "100%", height: "auto" }}
       >
         <Geographies geography={GEO_URL}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
+          {({ geographies }: { geographies: RSMFeature[] }) =>
+            geographies.map((geo: RSMFeature) => {
               const numericId = String(geo.id).padStart(3, "0");
               const alpha2 = NUMERIC_TO_ALPHA2[numericId];
               const fill = alpha2

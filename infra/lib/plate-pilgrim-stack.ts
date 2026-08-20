@@ -167,13 +167,8 @@ export class PlatePilgrimStack extends cdk.Stack {
       dareApiFn
     );
 
-    // Protected routes — require Cognito JWT
-    const jwtRouteOptions: apigw.AddRoutesOptions = {
-      authorizer,
-      authorizationScopes: [],
-      integration: mealsIntegration, // overridden per-route below
-    };
 
+    // Protected routes — require Cognito JWT
     httpApi.addRoutes({
       path: "/meals",
       methods: [apigw.HttpMethod.GET],

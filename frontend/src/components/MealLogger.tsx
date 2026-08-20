@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { api, LogMealRequest, Meal } from "../api";
+import { api } from "../api";
+import type { LogMealRequest, Meal } from "../api";
 
 // Simple country list for the picker — matching our backend COUNTRIES list
 const COUNTRIES = [

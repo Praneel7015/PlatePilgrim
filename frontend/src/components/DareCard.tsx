@@ -1,4 +1,4 @@
-import { DareResponse } from "../api";
+import type { DareResponse } from "../api";
 
 interface Props {
   dare: DareResponse | null;
