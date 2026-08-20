@@ -11,80 +11,63 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const svg = `
 <svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="675" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0D0F14"/>
-      <stop offset="100%" stop-color="#0A1626"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="48%" r="58%">
-      <stop offset="0%" stop-color="#1A2438" stop-opacity="0.95"/>
-      <stop offset="100%" stop-color="#0D0F14" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
-      <stop offset="0%" stop-color="transparent"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0.5"/>
-    </radialGradient>
+    <clipPath id="globeClip">
+      <circle cx="470" cy="300" r="188"/>
+    </clipPath>
   </defs>
 
-  <rect width="1200" height="675" fill="url(#bg)"/>
-  <rect width="1200" height="675" fill="url(#glow)"/>
+  <rect width="1200" height="675" fill="#F6F1E8"/>
 
-  <g stroke="#FFFFFF" stroke-opacity="0.028" stroke-width="0.8">
-    <line x1="0" y1="112" x2="1200" y2="112"/>
-    <line x1="0" y1="225" x2="1200" y2="225"/>
-    <line x1="0" y1="337" x2="1200" y2="337"/>
-    <line x1="0" y1="450" x2="1200" y2="450"/>
-    <line x1="0" y1="562" x2="1200" y2="562"/>
-    <line x1="150" y1="0" x2="150" y2="675"/>
-    <line x1="300" y1="0" x2="300" y2="675"/>
-    <line x1="450" y1="0" x2="450" y2="675"/>
-    <line x1="600" y1="0" x2="600" y2="675"/>
-    <line x1="750" y1="0" x2="750" y2="675"/>
-    <line x1="900" y1="0" x2="900" y2="675"/>
-    <line x1="1050" y1="0" x2="1050" y2="675"/>
+  <!-- faint corner stamp rings — graphic, not a grid -->
+  <circle cx="80" cy="80" r="120" fill="none" stroke="#DC3220" stroke-width="2" stroke-opacity="0.12"/>
+  <circle cx="80" cy="80" r="98" fill="none" stroke="#DC3220" stroke-width="1" stroke-dasharray="6 5" stroke-opacity="0.12"/>
+  <circle cx="1140" cy="620" r="140" fill="none" stroke="#067A5F" stroke-width="2" stroke-opacity="0.12"/>
+  <circle cx="1140" cy="620" r="116" fill="none" stroke="#067A5F" stroke-width="1" stroke-dasharray="6 5" stroke-opacity="0.12"/>
+  <circle cx="1120" cy="70" r="70" fill="none" stroke="#D4860C" stroke-width="1.5" stroke-opacity="0.16"/>
+
+  <!-- ── Globe ─────────────────────────────────────────────────────── -->
+  <circle cx="470" cy="300" r="188" fill="#6EA8C4"/>
+
+  <g clip-path="url(#globeClip)">
+    <path d="M318 228 C352 188, 412 182, 444 214 C470 240, 456 274, 424 292 C386 314, 338 306, 316 274 C304 254, 300 244, 318 228Z" fill="#067A5F"/>
+    <path d="M392 318 C418 312, 438 328, 442 354 C446 388, 428 436, 404 456 C382 472, 366 452, 372 424 C378 396, 372 358, 392 318Z" fill="#067A5F"/>
+    <path d="M486 208 C508 198, 536 206, 546 228 C554 248, 538 260, 516 258 C494 256, 476 230, 486 208Z" fill="#067A5F"/>
+    <path d="M508 248 C548 236, 578 262, 582 300 C588 344, 566 392, 538 412 C508 432, 488 402, 494 366 C500 330, 486 272, 508 248Z" fill="#067A5F"/>
+    <path d="M556 192 C616 172, 684 190, 710 228 C732 260, 720 296, 680 306 C644 316, 606 290, 582 256 C564 232, 544 208, 556 192Z" fill="#067A5F"/>
+    <path d="M676 372 C704 364, 728 378, 732 398 C736 418, 714 432, 690 428 C668 424, 656 388, 676 372Z" fill="#067A5F"/>
   </g>
 
-  <circle cx="600" cy="337" r="280" fill="none" stroke="#DC3220" stroke-width="2" stroke-opacity="0.42"/>
-  <circle cx="600" cy="337" r="258" fill="none" stroke="#DC3220" stroke-width="1" stroke-opacity="0.22" stroke-dasharray="9 6"/>
+  <g fill="none" stroke="#F6F1E8" stroke-opacity="0.4" stroke-width="1.3">
+    <ellipse cx="470" cy="300" rx="66" ry="188"/>
+    <ellipse cx="470" cy="300" rx="132" ry="188"/>
+    <line x1="282" y1="300" x2="658" y2="300"/>
+    <ellipse cx="470" cy="300" rx="188" ry="66"/>
+    <ellipse cx="470" cy="300" rx="188" ry="122"/>
+  </g>
+  <circle cx="470" cy="300" r="188" fill="none" stroke="#1A2744" stroke-width="6"/>
 
-  <circle cx="210" cy="190" r="155" fill="none" stroke="#D4860C" stroke-width="1.8" stroke-opacity="0.38"/>
-  <circle cx="210" cy="190" r="138" fill="none" stroke="#D4860C" stroke-width="0.8" stroke-opacity="0.18" stroke-dasharray="7 5"/>
-
-  <circle cx="1010" cy="510" r="175" fill="none" stroke="#067A5F" stroke-width="1.8" stroke-opacity="0.4"/>
-  <circle cx="1010" cy="510" r="157" fill="none" stroke="#067A5F" stroke-width="0.8" stroke-opacity="0.18" stroke-dasharray="7 5"/>
-
-  <circle cx="1060" cy="115" r="88" fill="none" stroke="#D4860C" stroke-width="1.4" stroke-opacity="0.28"/>
-  <circle cx="140" cy="575" r="95" fill="none" stroke="#DC3220" stroke-width="1.4" stroke-opacity="0.28"/>
-
-  <circle cx="480" cy="290" r="8" fill="#067A5F" fill-opacity="0.7"/>
-  <circle cx="680" cy="210" r="9" fill="#067A5F" fill-opacity="0.65"/>
-  <circle cx="820" cy="380" r="7" fill="#067A5F" fill-opacity="0.7"/>
-  <circle cx="530" cy="430" r="10" fill="#067A5F" fill-opacity="0.62"/>
-
-  <circle cx="560" cy="330" r="7" fill="#DC3220" fill-opacity="0.7"/>
-  <circle cx="640" cy="390" r="8" fill="#DC3220" fill-opacity="0.65"/>
-  <circle cx="430" cy="360" r="6" fill="#DC3220" fill-opacity="0.68"/>
-  <circle cx="760" cy="260" r="7" fill="#DC3220" fill-opacity="0.65"/>
-
-  <g stroke="#067A5F" stroke-opacity="0.16" stroke-width="1" fill="none">
-    <path d="M480,290 C530,270 620,230 680,210"/>
-    <path d="M680,210 C720,230 760,270 820,380"/>
+  <!-- ── Passport overlapping the globe ────────────────────────────── -->
+  <g transform="translate(690 148) rotate(-8)">
+    <rect x="16" y="12" width="198" height="270" rx="9" fill="#FAF7F0" stroke="#D2CBBE" stroke-width="2"/>
+    <rect x="0" y="0" width="198" height="270" rx="9" fill="#1A2744"/>
+    <rect x="14" y="14" width="170" height="242" rx="5" fill="none" stroke="#D4860C" stroke-width="1.8"/>
+    <rect x="22" y="22" width="154" height="226" rx="3" fill="none" stroke="#D4860C" stroke-width="0.9" stroke-dasharray="4 3.5"/>
+    <circle cx="99" cy="118" r="42" fill="none" stroke="#D4860C" stroke-width="2.8"/>
+    <circle cx="99" cy="118" r="33" fill="none" stroke="#D4860C" stroke-width="1.1" stroke-dasharray="4 3"/>
+    <circle cx="99" cy="118" r="16" fill="none" stroke="#D4860C" stroke-width="1.5"/>
+    <ellipse cx="99" cy="118" rx="7" ry="16" fill="none" stroke="#D4860C" stroke-width="1.2"/>
+    <line x1="83" y1="118" x2="115" y2="118" stroke="#D4860C" stroke-width="1.2"/>
   </g>
 
-  <rect width="1200" height="675" fill="url(#vignette)"/>
-
-  <!-- Soft scrim so type stays readable -->
-  <rect x="180" y="210" width="840" height="255" rx="8" fill="#0D0F14" fill-opacity="0.28"/>
-
-  <!-- Title + one line only -->
-  <text x="600" y="330" text-anchor="middle"
+  <!-- Title lockup -->
+  <text x="600" y="568" text-anchor="middle"
         font-family="Segoe UI, Arial, sans-serif"
-        font-size="78" font-weight="700" letter-spacing="-1.5"
-        fill="#F7F7F5">PlatePilgrim</text>
-
-  <text x="600" y="390" text-anchor="middle"
+        font-size="52" font-weight="700" letter-spacing="-0.8"
+        fill="#111318">PlatePilgrim</text>
+  <text x="600" y="604" text-anchor="middle"
         font-family="Segoe UI, Arial, sans-serif"
-        font-size="24" font-weight="400" letter-spacing="0.4"
-        fill="#C8C4BA">Turn every meal into a passport stamp.</text>
+        font-size="18" font-weight="400"
+        fill="#5A5F6C">Turn every meal into a passport stamp.</text>
 </svg>
 `;
 
@@ -105,6 +88,4 @@ const resvg = new Resvg(svg, {
 const pngBuffer = resvg.render().asPng();
 const outPath = path.join(__dirname, "cover-image.png");
 fs.writeFileSync(outPath, pngBuffer);
-
-const sizeKb = Math.round(pngBuffer.length / 1024);
-console.log(`Written ${outPath} (${sizeKb} KB)`);
+console.log(`Written ${outPath} (${Math.round(pngBuffer.length / 1024)} KB)`);
