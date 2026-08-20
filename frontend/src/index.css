@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-chili: #C0392B;
+  --color-saffron: #F39C12;
+  --color-navy: #2C3E50;
+  --color-parchment: #F5F0E8;
+  --color-parchment-dark: #E8E0D0;
+  --color-ink: #1a252f;
+
+  --font-family-display: "Playfair Display", "Georgia", serif;
+  --font-family-body: "Inter", "system-ui", sans-serif;
+}
+
+/* Dark mode using the class strategy */
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  font-family: var(--font-family-body);
+  background-color: var(--color-parchment);
+  color: var(--color-navy);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background-color: var(--color-ink);
+  color: var(--color-parchment);
+}
+
+/* Vintage stamp border utility */
+.stamp-border {
+  border: 3px dashed var(--color-saffron);
+  border-radius: 4px;
+}
+
+/* Page-turn animation on cards */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up {
+  animation: slide-up 0.3s ease both;
+}
