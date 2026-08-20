@@ -8,6 +8,7 @@ import MealLogger from "./components/MealLogger";
 import DareCard from "./components/DareCard";
 import DarkModeToggle from "./components/DarkModeToggle";
 import PassportDrawer from "./components/PassportDrawer";
+import LandingPage from "./components/LandingPage";
 
 function CallbackPage() {
   const [error, setError] = useState<string | null>(null);
@@ -106,57 +107,7 @@ function App() {
 
   // ── Landing (signed out) ───────────────────────────────────────────
   if (!authed) {
-    return (
-      <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
-        {/* Desaturated map fills the screen */}
-        <div style={{ position: "absolute", inset: 0, filter: "saturate(0.12) brightness(1.08)", pointerEvents: "none" }}>
-          <WorldMap stampedCodes={new Set()} exploredCounts={{}} onCountryClick={() => {}} isDark={isDark} />
-        </div>
-        {/* Subtle overlay */}
-        <div style={{ position: "absolute", inset: 0, background: isDark ? "rgba(0,0,0,0.55)" : "rgba(247,247,245,0.6)" }} />
-
-        {/* Theme toggle */}
-        <div style={{ position: "absolute", top: 16, right: 20, zIndex: 20 }}>
-          <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
-        </div>
-
-        {/* Sign-in card */}
-        <div style={{ position: "relative", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "24px" }}>
-          <div className="animate-fade-in" style={{
-            background: "var(--color-surface)",
-            borderRadius: 20,
-            padding: "48px 40px",
-            maxWidth: 380,
-            width: "100%",
-            textAlign: "center",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.14)",
-            border: "1px solid var(--color-border)",
-          }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>🌍</div>
-            <h1 style={{ fontFamily: "var(--font-family-display)", fontWeight: 800, fontSize: "2.4rem", color: "var(--color-ink)", letterSpacing: "-0.5px", lineHeight: 1.1, marginBottom: 10 }}>
-              PlatePilgrim
-            </h1>
-            <p style={{ color: "var(--color-ink-2)", fontSize: 16, marginBottom: 32 }}>
-              Eat your way around the world.
-            </p>
-            <button
-              onClick={signIn}
-              style={{
-                width: "100%", padding: "13px 0", borderRadius: 10,
-                background: "var(--color-red)", color: "#fff",
-                fontFamily: "var(--font-family-display)", fontWeight: 700,
-                fontSize: 15, border: "none", cursor: "pointer",
-                transition: "background 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-red-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-red)")}
-            >
-              Start your journey
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <LandingPage isDark={isDark} onToggle={toggleDark} onSignIn={signIn} />;
   }
 
   // ── App shell ──────────────────────────────────────────────────────
